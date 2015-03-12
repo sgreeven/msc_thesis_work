@@ -5,7 +5,8 @@ turtles-own [
   CountryCode
   Vision
   ExpectedBAUemission
-  CCawareness  
+  CCawareness
+  CCawarenessDueToDisaster  
   EmissionList
   Emission 
 ]
@@ -29,6 +30,8 @@ globals [
   ChanceForSucces
   ReductionPolicy
   CumulativeMitigation
+  LocalityOfClimateDisasterList
+  ClimateDisasterMemoryCounter
 ]
 
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -101,6 +104,7 @@ to setup
     DetermineInitBAUemission
     DetermineImpactGraph
     set InternationalPreferenceList (list)
+    set LocalityOfClimateDisasterList (list)
     DetermineEmission
 end
 
@@ -124,6 +128,7 @@ to go
   DetermineBAUemission
   DetermineExpectedBAUemission
   DetermineCCawareness
+  DetermineClimateDisaster
   DeterminePoliticalPreference
   DetermineEmission
   EmitGHG
@@ -146,18 +151,27 @@ to DetermineExpectedBAUemission
   [set ExpectedBAUemission (BAUemission)]]
 end
 
+to DetermineClimateDisaster
+  set LocalityOfClimateDisasterList [1 2 3 4 5]
+  if ChanceOfClimateDisaster > random-float 1 [
+    set ClimateDisasterMemoryCounter ClimateDisasterMemory
+    set LocalityOfClimateDisasterList sublist (shuffle LocalityOfClimateDisasterList) 0 random 5
+    ask turtles [if member? Countrycode LocalityOfClimateDisasterList [set CCawarenessDueToDisaster SeverityOfClimateDisaster]
+    ]
+  ]
+end
+
 to DetermineCCawareness
   ask turtles [
-    set CCawareness (0 - ((1 - 0) / (-1 + ExpFactor ^ (InitBAUemission * ImpactFactor / 1000)))) + (((1 - 0) / (-1 + ExpFactor ^ (InitBAUemission * ImpactFactor / 1000)) * ExpFactor ^ (ExpectedBAUemission / 1000))) 
-    if CCawareness > 1 [set CCawareness 1]
-    
-;    ifelse CCawareness > 0.8 [set color 65] 
-;    [ifelse CCawareness > 0.6 [set color 68]
-;    [ifelse CCawareness > 0.4 [set color 25]
-;    [ifelse CCawareness > 0.2 [set color 28]
-;    [set color 15]]
-;    ]
-;    ]
+    set CCawareness (0 - ((1 - 0) / (-1 + ExpFactor ^ (InitBAUemission * ImpactFactor / 1000)))) + (((1 - 0) / (-1 + ExpFactor ^ (InitBAUemission * ImpactFactor / 1000)) * ExpFactor ^ (ExpectedBAUemission / 1000)))    
+    if CCawareness > 1 [set CCawareness 1]  
+  ]
+  if  ClimateDisasterMemoryCounter > 0 [
+      ask turtles [
+        set CCawareness CCawareness + CCawarenessDueToDisaster
+        if CCawareness > 1 [set CCawareness 1]
+        ]
+      set ClimateDisasterMemoryCounter ClimateDisasterMemoryCounter - 1
   ]
 end
 
@@ -180,7 +194,8 @@ to DetermineEmission
   ask Persons [set Emission mean EmissionList]
   ask Governments [set Emission mean EmissionList]
 end 
-    
+
+   
 to EmitGHG
   set GHG 0
   ask Persons [
@@ -264,7 +279,7 @@ SLIDER
 #persons
 0
 500
-250
+80
 1
 1
 NIL
@@ -858,13 +873,13 @@ PENS
 SLIDER
 1095
 670
-1282
+1280
 703
 ChanceOfClimateDisaster
 ChanceOfClimateDisaster
 0
 1
-0.01
+0.02
 .01
 1
 NIL
@@ -883,13 +898,13 @@ The total ghg emissions consists of individual emissions and national controlled
 SLIDER
 1095
 705
-1285
+1280
 738
-SeverityOfClimateChangeDisaster
-SeverityOfClimateChangeDisaster
+SeverityOfClimateDisaster
+SeverityOfClimateDisaster
 0
 1
-0
+0.1
 .05
 1
 NIL
@@ -1415,6 +1430,21 @@ TEXTBOX
 11
 94.0
 1
+
+SLIDER
+1095
+740
+1280
+773
+ClimateDisasterMemory
+ClimateDisasterMemory
+0
+100
+5
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
