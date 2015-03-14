@@ -21,19 +21,16 @@ class EVO(NetLogoModelStructureInterface):
     run_length = 100
       
     uncertainties = [
-#                      ParameterUncertainty((1,1), 'ImpactFactor')],  
-#                      ParameterUncertainty((0.01,0.20), 'ReductionPolicyImpact'),
-#    		             ParameterUncertainty((5,30), 'YearsBetweenInternationalNegotiations'),  
-                     ParameterUncertainty((0.59,0.60), 'RatioLocalEmissionNationalEmission')  
-#                      ParameterUncertainty((0,20), 'SDVisionDistribution')                   
+                     ParameterUncertainty((1.03,1.05), 'ExpFactor'),  
+   		             ParameterUncertainty((10,15), 'YearsBetweenInternationalNegotiations'),  
+                     ParameterUncertainty((0.3,0.5), 'RatioIndividualEmissionNationalEmission'),  
+                     ParameterUncertainty((0.05,0.15), 'InitialSeverityOfClimateDisaster')                   
                      ]
       
     outcomes = [Outcome('cumulativeghg', time=True),  #
                 Outcome('ghg', time=True)
                 ]
     
-
-      
 if __name__ == "__main__":
     #turn on logging
     ema_logging.log_to_stderr(ema_logging.INFO)
@@ -50,10 +47,9 @@ if __name__ == "__main__":
 #     run in parallel, if not set, FALSE is assumed
     ensemble.parallel = True
       
-    cases = [ {'RatioLocalEmissionNationalEmission': 0.5} for _ in range(1000)]  
-    
+#     cases = [ {'RatioLocalEmissionNationalEmission': 0.4} for _ in range(100)]
     
     #perform experiments
-    results = ensemble.perform_experiments(cases, reporting_interval=10)
+    results = ensemble.perform_experiments(100)
       
-    save_results(results, r'.\data\EMA results ModelSebastiaanGreeven 1000 exp .tar.gz')
+    save_results(results, r'.\data\EMA results ModelSebastiaanGreeven 100 exp.tar.gz')

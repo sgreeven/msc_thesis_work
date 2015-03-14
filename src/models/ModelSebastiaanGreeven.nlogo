@@ -1,18 +1,27 @@
-breed [Governments government]
-breed [Persons person]
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+; AGENTS ARE DEFINED
+
+breed [Governments Government]
+breed [Individuals Individual]
+
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+; VARIABLES ARE DEFINED
 
 turtles-own [
   CountryCode
-  Vision
+  TimeHorizon
   ExpectedBAUemission
   CCawareness
-  CCawarenessDueToDisaster  
+  CCawarenessDueToDisaster
+  PersonalMitigation
+  EnforcedMitigation
+  TotalMitigation  
   EmissionList
   Emission 
 ]
 
 Governments-own [
-  PoliticalPreference
+  MitigationPolicy
   DemocraticValue
 ]
 
@@ -21,107 +30,162 @@ globals [
   CumulativeGHG
   InitBAUemission
   BAUemission
-  CostsTurningPointYear1
-  Agreement
-  InternationalPreferenceList
+  MitigationGoal
+  MitigationGoalPreferences
+  NegotiationCooperatorsList
   CumGHG
   Impact
   OpinionDifference
   ChanceForSucces
+  InternationalPreferenceList
   ReductionPolicy
   CumulativeMitigation
+  ClimateDisasterYearList
   LocalityOfClimateDisasterList
   ClimateDisasterMemoryCounter
+  NegotiationList
+  MitigationByIndividuals
+  CumulativeMitigationByIndividuals
+  MitigationByGovernments
+  CumulativeMitigationByGovernments
+  TotalEnforcedMitigation
+  MitigationIndividualsGovernmentsRatio  
 ]
 
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+; SETUP
       
 to setup
   clear-all
   reset-ticks
-  
-  create-Persons #Persons[
+
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------    
+; GOVERNMENTS AND INDIVIDUALS ARE CREATED AND ATTRIBUTES ARE DISTRIBUTED
+
+    if Distribution = "Random" [
+      set TimeHorizonInd1 random 100 set TimehorizonGov1 random 100 set DemocraticValue1 precision (random-float 1) 2
+      set TimeHorizonInd2 random 100 set TimehorizonGov2 random 100 set DemocraticValue2 precision (random-float 1) 2
+      set TimeHorizonInd3 random 100 set TimehorizonGov3 random 100 set DemocraticValue3 precision (random-float 1) 2
+      set TimeHorizonInd4 random 100 set TimehorizonGov4 random 100 set DemocraticValue4 precision (random-float 1) 2
+      set TimeHorizonInd5 random 100 set TimehorizonGov5 random 100 set DemocraticValue5 precision (random-float 1) 2
+      set TimeHorizonInd6 random 100 set TimehorizonGov6 random 100 set DemocraticValue6 precision (random-float 1) 2
+      set TimeHorizonInd7 random 100 set TimehorizonGov7 random 100 set DemocraticValue7 precision (random-float 1) 2
+      set TimeHorizonInd8 random 100 set TimehorizonGov8 random 100 set DemocraticValue8 precision (random-float 1) 2
+      set TimeHorizonInd9 random 100 set TimehorizonGov9 random 100 set DemocraticValue9 precision (random-float 1) 2
+      set TimeHorizonInd10 random 100 set TimehorizonGov10 random 100 set DemocraticValue10 precision (random-float 1) 2]
+    
+    if Distribution = "Automatic" [
+      set TimeHorizonInd1 5 set TimehorizonGov1 16 set DemocraticValue1 0.6
+      set TimeHorizonInd2 30 set TimehorizonGov2 5 set DemocraticValue2 0.2
+      set TimeHorizonInd3 28 set TimehorizonGov3 30 set DemocraticValue3 0.7
+      set TimeHorizonInd4 15 set TimehorizonGov4 12 set DemocraticValue4 0.2
+      set TimeHorizonInd5 9 set TimehorizonGov5 19 set DemocraticValue5 0.3
+      set TimeHorizonInd6 0 set TimehorizonGov6 0 set DemocraticValue6 0
+      set TimeHorizonInd7 0 set TimehorizonGov7 0 set DemocraticValue7 0
+      set TimeHorizonInd8 0 set TimehorizonGov8 0 set DemocraticValue8 0
+      set TimeHorizonInd9 0 set TimehorizonGov9 0 set DemocraticValue9 0
+      set TimeHorizonInd10 0 set TimehorizonGov10 0 set DemocraticValue10 0
+      
+      set #IndividualsPerGovernment 100
+      set #Governments 5]
+
+  create-Individuals (#IndividualsPerGovernment * #Governments) [
+    ask Individuals [set CountryCode ceiling ((who + 1) * #Governments / (#IndividualsPerGovernment * #Governments)) ] ; Agents are divided over the different Governments by a CountryCode 
+    
+    if VisualRepresentation = True [
     set color white
     set shape "circle"
     set size .4
-    ask Persons [set CountryCode ceiling ((who + 1) * #Governments / #Persons) ] ; Agents are divided over the different Governments by a CountryCode    
     set xcor random-normal (min-pxcor + (max-pxcor - min-pxcor - 4) / #Governments * CountryCode) 1; Agents are located beneath the Governments with some spread
-    set ycor random-normal -5 1
-    
-    ask Persons with [CountryCode = 1] [set Vision random-normal Vision1 SDVisionDistribution; Agents are given a Vision, normally distributed
-    while [(Vision > 100) or (Vision < 0)]  [set Vision random-normal Vision1 SDVisionDistribution]]; If the normal distribution causes a Vision to fall outside the boundaries of 0 and 100, it tries again
-    ask Persons with [CountryCode = 2] [set Vision random-normal Vision2 SDVisionDistribution
-    while [(Vision > 100) or (Vision < 0)]  [set Vision random-normal Vision2 SDVisionDistribution]]
-    ask Persons with [CountryCode = 3] [set Vision random-normal Vision3 SDVisionDistribution
-    while [(Vision > 100) or (Vision < 0)]  [set Vision random-normal Vision3 SDVisionDistribution]]
-    ask Persons with [CountryCode = 4] [set Vision random-normal Vision4 SDVisionDistribution
-    while [(Vision > 100) or (Vision < 0)]  [set Vision random-normal Vision4 SDVisionDistribution]]
-    ask Persons with [CountryCode = 5] [set Vision random-normal Vision5 SDVisionDistribution
-    while [(Vision > 100) or (Vision < 0)]  [set Vision random-normal Vision5 SDVisionDistribution]]
-    ask Persons with [CountryCode = 6] [set Vision random-normal Vision6 SDVisionDistribution
-    while [(Vision > 100) or (Vision < 0)]  [set Vision random-normal Vision6 SDVisionDistribution]]
-    ask Persons with [CountryCode = 7] [set Vision random-normal Vision7 SDVisionDistribution
-    while [(Vision > 100) or (Vision < 0)]  [set Vision random-normal Vision7 SDVisionDistribution]]
-    ask Persons with [CountryCode = 8] [set Vision random-normal Vision8 SDVisionDistribution
-    while [(Vision > 100) or (Vision < 0)]  [set Vision random-normal Vision8 SDVisionDistribution]]
-    ask Persons with [CountryCode = 9] [set Vision random-normal Vision9 SDVisionDistribution
-    while [(Vision > 100) or (Vision < 0)]  [set Vision random-normal Vision9 SDVisionDistribution]]
-    ask Persons with [CountryCode = 10] [set Vision random-normal Vision10 SDVisionDistribution
-    while [(Vision > 100) or (Vision < 0)]  [set Vision random-normal Vision10 SDVisionDistribution]]
+    set ycor random-normal -5 1]
+     
+    ask Individuals with [CountryCode = 1] [set TimeHorizon random-normal TimeHorizonInd1 SDTimeHorizonDistribution; Agents are given a TimeHorizon, normally distributed
+    while [(TimeHorizon > AmountOfYears) or (TimeHorizon < 0)]  [set TimeHorizon random-normal TimeHorizonInd1 SDTimeHorizonDistribution]]; If the normal distribution causes a TimeHorizon to fall outside the boundaries of 0 and 100, it tries again
+    ask Individuals with [CountryCode = 2] [set TimeHorizon random-normal TimeHorizonInd2 SDTimeHorizonDistribution
+    while [(TimeHorizon > AmountOfYears) or (TimeHorizon < 0)]  [set TimeHorizon random-normal TimeHorizonInd2 SDTimeHorizonDistribution]]
+    ask Individuals with [CountryCode = 3] [set TimeHorizon random-normal TimeHorizonInd3 SDTimeHorizonDistribution
+    while [(TimeHorizon > AmountOfYears) or (TimeHorizon < 0)]  [set TimeHorizon random-normal TimeHorizonInd3 SDTimeHorizonDistribution]]
+    ask Individuals with [CountryCode = 4] [set TimeHorizon random-normal TimeHorizonInd4 SDTimeHorizonDistribution
+    while [(TimeHorizon > AmountOfYears) or (TimeHorizon < 0)]  [set TimeHorizon random-normal TimeHorizonInd4 SDTimeHorizonDistribution]]
+    ask Individuals with [CountryCode = 5] [set TimeHorizon random-normal TimeHorizonInd5 SDTimeHorizonDistribution
+    while [(TimeHorizon > AmountOfYears) or (TimeHorizon < 0)]  [set TimeHorizon random-normal TimeHorizonInd5 SDTimeHorizonDistribution]]
+    ask Individuals with [CountryCode = 6] [set TimeHorizon random-normal TimeHorizonInd6 SDTimeHorizonDistribution
+    while [(TimeHorizon > AmountOfYears) or (TimeHorizon < 0)]  [set TimeHorizon random-normal TimeHorizonInd6 SDTimeHorizonDistribution]]
+    ask Individuals with [CountryCode = 7] [set TimeHorizon random-normal TimeHorizonInd7 SDTimeHorizonDistribution
+    while [(TimeHorizon > AmountOfYears) or (TimeHorizon < 0)]  [set TimeHorizon random-normal TimeHorizonInd7 SDTimeHorizonDistribution]]
+    ask Individuals with [CountryCode = 8] [set TimeHorizon random-normal TimeHorizonInd8 SDTimeHorizonDistribution
+    while [(TimeHorizon > AmountOfYears) or (TimeHorizon < 0)]  [set TimeHorizon random-normal TimeHorizonInd8 SDTimeHorizonDistribution]]
+    ask Individuals with [CountryCode = 9] [set TimeHorizon random-normal TimeHorizonInd9 SDTimeHorizonDistribution
+    while [(TimeHorizon > AmountOfYears) or (TimeHorizon < 0)]  [set TimeHorizon random-normal TimeHorizonInd9 SDTimeHorizonDistribution]]
+    ask Individuals with [CountryCode = 10] [set TimeHorizon random-normal TimeHorizonInd10 SDTimeHorizonDistribution
+    while [(TimeHorizon > AmountOfYears) or (TimeHorizon < 0)]  [set TimeHorizon random-normal TimeHorizonInd10 SDTimeHorizonDistribution]]
     
     set EmissionList (list)   
   ]
       
   create-Governments #Governments[
+    ask Governments [set CountryCode who - (#IndividualsPerGovernment * #Governments) + 1]; Governments are given a CountryCode as well, to link them to their Individuals 
+    
+    if VisualRepresentation = True [
     set color white
     set shape "orbit 6"
     set size 1
-    ask Governments [set CountryCode who - #Persons + 1]; Governments are given a CountryCode as well, to link them to their citizens 
     set xcor min-pxcor + (max-pxcor - min-pxcor - 4) / #Governments * CountryCode
     set ycor random-normal 8 2
-    ask Governments [create-links-with other Governments]; Links between Governments are made to illustrate that they participate in international Negotiations
+    ask Governments [create-links-with other Governments]]; Links between Governments are made to illustrate that they participate in international Negotiations
+    
     let i  1
     while [i <= #Governments] [
-      ask Governments with [CountryCode = i] [create-links-with Persons with [CountryCode = i]]
-      set i i + 1   
+      ask Governments with [CountryCode = i] [create-links-with Individuals with [CountryCode = i]]
+      set i i + 1]   
       
-    ask Governments with [CountryCode = 1] [set Vision VisionCountry1 set DemocraticValue DemocraticValue1]; Governments are given a Vision and a democratic value
-    ask Governments with [CountryCode = 2] [set Vision VisionCountry2 set DemocraticValue DemocraticValue2]
-    ask Governments with [CountryCode = 3] [set Vision VisionCountry3 set DemocraticValue DemocraticValue3]
-    ask Governments with [CountryCode = 4] [set Vision VisionCountry4 set DemocraticValue DemocraticValue4]
-    ask Governments with [CountryCode = 5] [set Vision VisionCountry5 set DemocraticValue DemocraticValue5]
-    ask Governments with [CountryCode = 6] [set Vision VisionCountry6 set DemocraticValue DemocraticValue6]
-    ask Governments with [CountryCode = 7] [set Vision VisionCountry7 set DemocraticValue DemocraticValue7]
-    ask Governments with [CountryCode = 8] [set Vision VisionCountry8 set DemocraticValue DemocraticValue8]
-    ask Governments with [CountryCode = 9] [set Vision VisionCountry9 set DemocraticValue DemocraticValue9]
-    ask Governments with [CountryCode = 10] [set Vision VisionCountry10 set DemocraticValue DemocraticValue10]
+    ask Governments with [CountryCode = 1] [set TimeHorizon TimeHorizonGov1 set DemocraticValue DemocraticValue1]; Governments are given a TimeHorizon and a democratic value
+    ask Governments with [CountryCode = 2] [set TimeHorizon TimeHorizonGov2 set DemocraticValue DemocraticValue2]
+    ask Governments with [CountryCode = 3] [set TimeHorizon TimeHorizonGov3 set DemocraticValue DemocraticValue3]
+    ask Governments with [CountryCode = 4] [set TimeHorizon TimeHorizonGov4 set DemocraticValue DemocraticValue4]
+    ask Governments with [CountryCode = 5] [set TimeHorizon TimeHorizonGov5 set DemocraticValue DemocraticValue5]
+    ask Governments with [CountryCode = 6] [set TimeHorizon TimeHorizonGov6 set DemocraticValue DemocraticValue6]
+    ask Governments with [CountryCode = 7] [set TimeHorizon TimeHorizonGov7 set DemocraticValue DemocraticValue7]
+    ask Governments with [CountryCode = 8] [set TimeHorizon TimeHorizonGov8 set DemocraticValue DemocraticValue8]
+    ask Governments with [CountryCode = 9] [set TimeHorizon TimeHorizonGov9 set DemocraticValue DemocraticValue9]
+    ask Governments with [CountryCode = 10] [set TimeHorizon TimeHorizonGov10 set DemocraticValue DemocraticValue10]
     
     set EmissionList (list) 
     ]
-  ]  
+
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------    
+; LISTS ARE INITIALISED
+   
+    set ClimateDisasterYearList (list)
+    set LocalityOfClimateDisasterList (list)
+    set MitigationGoalPreferences (list)
+    set NegotiationCooperatorsList (list)
+    set NegotiationList (list)
+    set InternationalPreferenceList (list)
+
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------    
+; THE CLIMATE CHANGE IMPACT GRAPH IS CONSTRUCTED
     
-    DeterminePoliticalPreference
     DetermineInitBAUemission
     DetermineImpactGraph
-    set InternationalPreferenceList (list)
-    set LocalityOfClimateDisasterList (list)
-    DetermineEmission
+    
 end
 
 to DetermineInitBAUemission
-  ask Persons [set InitBAUemission (InitBAUemission + (AmountOfYears))]; Nog beginmitigatie in verwerken
-  ask Governments [set InitBAUemission (InitBAUemission + ((#Persons / #Governments / RatioLocalEmissionNationalEmission - #Persons / #Governments) * AmountOfYears))]
+  ask Individuals [set InitBAUemission (InitBAUemission + (100))]; Nog beginmitigatie in verwerken
+  ask Governments [set InitBAUemission (InitBAUemission + ((#IndividualsPerGovernment / RatioIndividualEmissionNationalEmission) * 100))]
 end 
 
 to DetermineImpactGraph
   set CumGHG 0
   while [CumGHG < (InitBAUemission * ImpactFactor / 1000)] [
     set CumGHG (CumGHG + 1)
-    set impact (0 - ((1 - 0) / (-1 + ExpFactor ^ (InitBAUemission * ImpactFactor / 1000)))) + (((1 - 0) / (-1 + ExpFactor ^ (InitBAUemission * ImpactFactor / 1000)) * ExpFactor ^ CumGHG))
+    set Impact (0 - ((1 - 0) / (-1 + ExpFactor ^ (InitBAUemission * ImpactFactor / 1000)))) + (((1 - 0) / (-1 + ExpFactor ^ (InitBAUemission * ImpactFactor / 1000)) * ExpFactor ^ CumGHG))
     update-plots] 
 end
   
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+; THE STEPS THAT ARE EXECUTED EVERY TICK
 
 to go
   tick
@@ -129,111 +193,190 @@ to go
   DetermineExpectedBAUemission
   DetermineCCawareness
   DetermineClimateDisaster
-  DeterminePoliticalPreference
+  DetermineMitigationPolicy
+  ExecuteNegotiations
   DetermineEmission
   EmitGHG
-  Negotiations
   DetermineCumulativeMitigation
 end
 
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------    
+; GOVERNMENTS AND INDIVIDUALS DETERMINE CLIMATE CHANGE AWARENESS
+
 to DetermineBAUemission
   set BAUemission 0
-  ask Persons [set BAUemission (BAUemission + ((AmountOfYears - ticks) * (1 - CCawareness - ReductionPolicy)))]
-  ask Governments [set BAUemission (BAUemission + ((#Persons / #Governments / RatioLocalEmissionNationalEmission - #Persons / #Governments) * (AmountOfYears - ticks)) * (1 - PoliticalPreference - ReductionPolicy))]
+  ask Individuals [set BAUemission (BAUemission + ((AmountOfYears - ticks) * (1 - CCawareness - ReductionPolicy)))]
+  ask Governments [set BAUemission (BAUemission + ((#IndividualsPerGovernment / RatioIndividualEmissionNationalEmission) * (AmountOfYears - ticks)) * (1 - MitigationPolicy - ReductionPolicy))]
   set BAUemission BAUemission + CumulativeGHG
 end   
 
 to DetermineExpectedBAUemission
-  ask turtles [ifelse ((AmountOfYears - ticks) > Vision)
-  [set ExpectedBAUemission (BAUemission * (Vision / (AmountOfYears - ticks)))]
+  ask turtles [ifelse ((AmountOfYears - ticks) > TimeHorizon)
+  [set ExpectedBAUemission (random-normal BAUemission (PredictionError * BAUemission)) * (TimeHorizon / (AmountOfYears - ticks))]
   [set ExpectedBAUemission (BAUemission)]]
-end
-
-to DetermineClimateDisaster
-  set LocalityOfClimateDisasterList [1 2 3 4 5]
-  if ChanceOfClimateDisaster > random-float 1 [
-    set ClimateDisasterMemoryCounter ClimateDisasterMemory
-    set LocalityOfClimateDisasterList sublist (shuffle LocalityOfClimateDisasterList) 0 random 5
-    ask turtles [if member? Countrycode LocalityOfClimateDisasterList [set CCawarenessDueToDisaster SeverityOfClimateDisaster]
-    ]
-  ]
 end
 
 to DetermineCCawareness
   ask turtles [
     set CCawareness (0 - ((1 - 0) / (-1 + ExpFactor ^ (InitBAUemission * ImpactFactor / 1000)))) + (((1 - 0) / (-1 + ExpFactor ^ (InitBAUemission * ImpactFactor / 1000)) * ExpFactor ^ (ExpectedBAUemission / 1000)))    
-    if CCawareness > 1 [set CCawareness 1]  
-  ]
-  if  ClimateDisasterMemoryCounter > 0 [
-      ask turtles [
-        set CCawareness CCawareness + CCawarenessDueToDisaster
-        if CCawareness > 1 [set CCawareness 1]
-        ]
-      set ClimateDisasterMemoryCounter ClimateDisasterMemoryCounter - 1
+    if CCawareness > 1 [set CCawareness 1] 
   ]
 end
 
-to DeterminePoliticalPreference
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------    
+; CLIMATE DISASTERS
+
+to DetermineClimateDisaster
+  if ClimateDisasters = True [    
+    if BaseChanceOfClimateDisaster + (EffectOfClimateChangeOnClimateDisasters * (0 - ((1 - 0) / (-1 + ExpFactor ^ (InitBAUemission * ImpactFactor / 1000)))) + 
+    (((1 - 0) / (-1 + ExpFactor ^ (InitBAUemission * ImpactFactor / 1000)) * ExpFactor ^ (CumulativeGHG / 1000)))) > random-float 1 [
+      let l 1
+      while [l <= #Governments] [
+        set LocalityOfClimateDisasterList lput l LocalityOfClimateDisasterList
+        set l l + 1
+      ]
+      set ClimateDisasterMemoryCounter ClimateDisasterMemory
+      set LocalityOfClimateDisasterList sublist (shuffle LocalityOfClimateDisasterList) 0 random #Governments
+      set ClimateDisasterYearList lput (ticks + 2000) ClimateDisasterYearList
+      set ClimateDisasterYearList lput LocalityOfClimateDisasterList ClimateDisasterYearList
+    ]
+    ask turtles [if member? Countrycode LocalityOfClimateDisasterList [set CCawarenessDueToDisaster (InitialSeverityOfClimateDisaster / ClimateDisasterMemory * ClimateDisasterMemoryCounter)]]
+
+ 
+  if  ClimateDisasterMemoryCounter > 0 [
+    ask turtles [
+      ifelse ClimateDisasterIncreaseMitigation = True [
+        set CCawareness CCawareness + CCawarenessDueToDisaster
+        if CCawareness > 1 [set CCawareness 1]]
+      [set CCawareness CCawareness - CCawarenessDueToDisaster
+        if CCawareness < 0 [set CCawareness 0]]]
+    set ClimateDisasterMemoryCounter ClimateDisasterMemoryCounter - 1
+  ]
+  ]
+
+end
+
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------    
+; GOVERNMENTS DETERMINE NATIONAL MITIGATION POLICY AND BARGAINING POSITION
+
+to DetermineMitigationPolicy
   let j  1
   while [j <= #Governments] [
-    ask Governments with [CountryCode = j] [set politicalpreference (((mean [CCawareness] of Persons with [CountryCode = j]) * DemocraticValue) + (CCawareness * (1 - DemocraticValue)))]
+    ask Governments with [CountryCode = j] [set MitigationPolicy (((mean [CCawareness] of Individuals with [CountryCode = j]) * DemocraticValue) + (CCawareness * (1 - DemocraticValue)))]
     set j j + 1
   ]
 end
 
-to DetermineEmission
-  ask Persons [
-    set EmissionList lput (max list 0 (1 - CCawareness - ReductionPolicy)) EmissionList
-    if length EmissionList > EmissionMemory [set EmissionList remove-item 0 EmissionList]]
-  ask Governments [
-    set EmissionList lput (max list 0 (1 - PoliticalPreference - ReductionPolicy) * (#Persons / #Governments / RatioLocalEmissionNationalEmission - #Persons / #Governments)) EmissionList
-    if length EmissionList > EmissionMemory [set EmissionList remove-item 0 EmissionList]]
-  
-  ask Persons [set Emission mean EmissionList]
-  ask Governments [set Emission mean EmissionList]
-end 
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------    
+; INTERNATIONAL NEGOTIATIONS ON CLIMATE CHANGE RESPONSE
 
-   
-to EmitGHG
-  set GHG 0
-  ask Persons [
-    set GHG GHG + Emission
-    set CumulativeGHG (CumulativeGHG + Emission)]
-  ask Governments [
-    set GHG GHG + Emission
-    set CumulativeGHG (CumulativeGHG + Emission)]
-end
-
-to Negotiations
-  if (ticks mod YearsbetweenInternationalNegotiations) = 0 [
-    ask Governments [
-      set InternationalPreferenceList lput politicalpreference InternationalPreferenceList
-      if length InternationalPreferenceList > #Governments [
-        set InternationalPreferenceList remove-item 0 InternationalPreferenceList]
-      
-      set OpinionDifference ((max InternationalPreferenceList) - (min InternationalPreferenceList))
-      set ChanceForSucces mean InternationalPreferenceList - (OpinionDifference * ImportanceOpinionDifference)
-      if ChanceForSucces > random-float 1 [set ReductionPolicy (ReductionPolicy + ReductionPolicyImpact)]
+to ExecuteNegotiations
+  if InternationalNegotiations = True [
+    if (ticks mod YearsbetweenInternationalNegotiations) = 0 [
+    ifelse StochasticDeterministicNegotiations = "GameTheory" [
+    set NegotiationCooperatorsList (list)
+    set MitigationGoal mean [MitigationPolicy] of Governments
+    ask Governments [ ; Round 1
+      ifelse MitigationPolicy >= MitigationGoal 
+      [set MitigationGoalPreferences lput MitigationPolicy MitigationGoalPreferences]
+      [set MitigationGoalPreferences lput 0 MitigationGoalPreferences]
     ]
+    set MitigationGoal mean MitigationGoalPreferences
+    set MitigationGoalPreferences (list)
+    ask Governments [ ; Round 2
+      ifelse MitigationPolicy >= MitigationGoal 
+      [set MitigationGoalPreferences lput MitigationPolicy MitigationGoalPreferences
+       set NegotiationCooperatorsList lput CountryCode NegotiationCooperatorsList]
+      [set MitigationGoalPreferences lput 0 MitigationGoalPreferences]
+    ]
+    set MitigationGoal mean MitigationGoalPreferences
+    if GameTheory = "Prisoners" [; Round 3, if the negotiations allow for free-rider behaviour
+      set NegotiationCooperatorsList (list)
+      ask Governments [ 
+        if MitigationPolicy >= MitigationGoal 
+        [set NegotiationCooperatorsList lput CountryCode NegotiationCooperatorsList]
+      ]
+    ]
+    ask Governments [ifelse member? Countrycode NegotiationCooperatorsList 
+    [set EnforcedMitigation (MitigationGoal * MitigationEnforcementFactor * EffectInternationalPolicyOnNationalPolicy)]
+    [set EnforcedMitigation 0]]
+    ask Individuals [ifelse member? Countrycode NegotiationCooperatorsList 
+    [set EnforcedMitigation (MitigationGoal * MitigationEnforcementFactor * EffectInternationalPolicyOnIndividuals)]
+    [set EnforcedMitigation 0]]
+    
+    set NegotiationList lput (ticks + 2000) NegotiationList
+    set NegotiationList lput NegotiationCooperatorsList NegotiationList
+  ]
+  [ask Governments [
+    set InternationalPreferenceList lput MitigationPolicy InternationalPreferenceList
+    if length InternationalPreferenceList > #Governments [
+    set InternationalPreferenceList remove-item 0 InternationalPreferenceList] 
+    set OpinionDifference ((max InternationalPreferenceList) - (min InternationalPreferenceList))
+    set ChanceForSucces mean InternationalPreferenceList - (OpinionDifference * ImportanceOpinionDifference)
+    if ChanceForSucces > (random-float 1 / ChanceForSuccesfulNegotiations) [
+      set EnforcedMitigation (ChanceForSucces * MitigationEnforcementFactor)
+      set NegotiationList lput (ticks + 2000) NegotiationList]]
+  ]
+  ]
   ]
 end
 
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------    
+; GOVERNMENTS AND INDIVIDUALS DETERMINE GHG EMISSION LEVELS
+
+to DetermineEmission
+  set MitigationByIndividuals 0
+  ask Individuals [
+    set PersonalMitigation CCawareness
+    set MitigationByIndividuals MitigationByIndividuals + PersonalMitigation
+    set CumulativeMitigationByIndividuals CumulativeMitigationByIndividuals + PersonalMitigation
+    set TotalEnforcedMitigation TotalEnforcedMitigation + EnforcedMitigation
+    set TotalMitigation (PersonalMitigation + EnforcedMitigation)
+    set EmissionList lput (max list 0 (1 - TotalMitigation)) EmissionList
+    if length EmissionList > EmissionMemory [set EmissionList remove-item 0 EmissionList]]
+  set MitigationByGovernments 0
+  ask Governments [
+    set PersonalMitigation MitigationPolicy
+    set MitigationByGovernments MitigationByGovernments + (PersonalMitigation * #IndividualsPerGovernment)
+    set CumulativeMitigationByGovernments CumulativeMitigationByGovernments + PersonalMitigation
+    set TotalEnforcedMitigation TotalEnforcedMitigation + EnforcedMitigation
+    set TotalMitigation (PersonalMitigation + EnforcedMitigation)
+    set EmissionList lput (max list 0 (1 - TotalMitigation)) EmissionList
+    if length EmissionList > EmissionMemory [set EmissionList remove-item 0 EmissionList]]  
+  ask Individuals [set Emission mean EmissionList]
+  ask Governments [set Emission (mean EmissionList * #IndividualsPerGovernment / RatioIndividualEmissionNationalEmission)]
+  if ticks > 1 [set MitigationIndividualsGovernmentsRatio MitigationByIndividuals / MitigationByGovernments]
+end 
+
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------    
+; GOVERNMENTS AND INDIVIDUALS EMIT GHG
+   
+to EmitGHG
+  set GHG 0
+  ask turtles [
+    set GHG GHG + Emission
+    set CumulativeGHG (CumulativeGHG + Emission)]
+end
+
+;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------    
+; CUMULATIVE MITIGATION IS CALCULATED
+
 to DetermineCumulativeMitigation
   set CumulativeMitigation 0
-  ask Persons [set CumulativeMitigation (CumulativeMitigation + CCawareness + ReductionPolicy)]
-  ask Governments [set CumulativeMitigation (CumulativeMitigation + (politicalpreference + ReductionPolicy) * (#Persons / #Governments / RatioLocalEmissionNationalEmission - #Persons / #Governments))]
+  ask Individuals [set CumulativeMitigation (CumulativeMitigation + CCawareness + EnforcedMitigation)]
+  ask Governments [set CumulativeMitigation (CumulativeMitigation + (MitigationPolicy + EnforcedMitigation) * (#IndividualsPerGovernment / RatioIndividualEmissionNationalEmission))]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-1290
-20
-1653
-404
+1209
+63
+1454
+309
 16
 16
-10.7
+6.52
 1
 10
 1
@@ -272,85 +415,85 @@ NIL
 
 SLIDER
 15
-165
-187
-198
-#persons
-#persons
+150
+190
+183
+#IndividualsPerGovernment
+#IndividualsPerGovernment
 0
-500
-80
+100
+100
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-105
-265
-197
-298
-Vision1
-Vision1
+111
+248
+203
+281
+TimeHorizonInd1
+TimeHorizonInd1
 0
 100
-15
-5
+35
+1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-105
-300
-197
-333
-Vision2
-Vision2
+111
+283
+203
+316
+TimeHorizonInd2
+TimeHorizonInd2
 0
 100
-50
-5
+60
+1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-105
-335
-197
-368
-Vision3
-Vision3
+111
+318
+203
+351
+TimeHorizonInd3
+TimeHorizonInd3
 0
 100
-40
-5
+74
+1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-105
-370
-197
-403
-Vision4
-Vision4
+111
+353
+203
+386
+TimeHorizonInd4
+TimeHorizonInd4
 0
 100
-40
-5
+0
+1
 1
 NIL
 HORIZONTAL
 
 TEXTBOX
-20
-675
-365
-835
-Explanations *\n1. Vision of governments on climate change impact [Years]\n2. Average Vision of Citizens on Climate Change Impact [Years]\n3. Democratic Value of governments, indicating the weight that individuals have in expressing their political preference [Factor 0-1]\n4. Standard deviation of vision distribution among citizens [Years]\n5. The emission of an agent is determined by taking the average of it's last two years and it's newly determined prefered emission. The reason is that emissionlevels cannot change immediatly. The emission memory determines the amount of years it takes into account to determine it's emission [Years]\n
+25
+695
+490
+941
+Explanations *\n1. Time horizon of governments on climate change impact [Years]\n2. Average Time Horizon of Citizens on Climate Change Impact [Years]\n3. Democratic Value of governments, indicating the weight that individuals have in expressing their political preference [Factor 0-1]\n4. Standard deviation of time horizon distribution among citizens [Years]\n5. The emission of an agent is determined by taking the average of it's last two years and it's newly determined prefered emission. The reason is that emissionlevels cannot change immediatly. The emission memory determines the amount of years it takes into account to determine it's emission [Years]\n
 11
 94.0
 1
@@ -374,12 +517,12 @@ NIL
 
 SLIDER
 15
-200
-187
-233
-#governments
-#governments
-0
+185
+190
+218
+#Governments
+#Governments
+1
 10
 5
 1
@@ -388,91 +531,91 @@ NIL
 HORIZONTAL
 
 SLIDER
-105
-405
-197
-438
-Vision5
-Vision5
+111
+388
+203
+421
+TimeHorizonInd5
+TimeHorizonInd5
 0
 100
-25
-5
+91
+1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-105
-440
-197
-473
-Vision6
-Vision6
+111
+423
+203
+456
+TimeHorizonInd6
+TimeHorizonInd6
 0
 100
-0
-5
+99
+1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-105
-475
-197
-508
-Vision7
-Vision7
+111
+458
+203
+491
+TimeHorizonInd7
+TimeHorizonInd7
 0
 100
-0
-5
+91
+1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-105
-510
-197
-543
-Vision8
-Vision8
+111
+493
+203
+526
+TimeHorizonInd8
+TimeHorizonInd8
 0
 100
-0
-5
+6
+1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-105
-545
-197
-578
-Vision9
-Vision9
+111
+528
+203
+561
+TimeHorizonInd9
+TimeHorizonInd9
 0
 100
-0
-5
+48
+1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-105
-581
-197
-614
-Vision10
-Vision10
+111
+564
+203
+597
+TimeHorizonInd10
+TimeHorizonInd10
 0
-5
-0
-5
+100
+49
+1
 1
 NIL
 HORIZONTAL
@@ -484,7 +627,7 @@ SLIDER
 53
 AmountOfYears
 AmountOfYears
-0
+1
 100
 100
 1
@@ -510,10 +653,10 @@ NIL
 1
 
 MONITOR
-805
-110
-885
-155
+1124
+369
+1204
+414
 Year
 ticks + 2000
 17
@@ -521,10 +664,10 @@ ticks + 2000
 11
 
 PLOT
-400
-20
-600
-170
+715
+265
+915
+415
 Cumulative GHG
 Time
 Cumulative GHG
@@ -537,23 +680,13 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plotxy ticks cumulativeghg"
-
-MONITOR
-1190
-145
-1270
-190
-NIL
-BAUemission
-0
-1
-11
+"pen-1" 1.0 0 -7500403 true "" "plotxy ticks ((InitBAUemission * AmountOfYears / 100) * ticks / AmountOfYears)"
 
 PLOT
-600
-20
-800
-170
+921
+265
+1121
+415
 GHG
 Time
 GHG
@@ -566,25 +699,26 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "if ticks > 1 [plot GHG]"
+"pen-1" 1.0 0 -7500403 true "" "if ticks > 1 [plot (InitBAUemission * AmountOfYears / 100) / AmountOfYears]"
 
 MONITOR
-805
-20
-885
-65
+1125
+320
+1205
+365
 GHG reduction
-1 - (ghg / (InitBAUemission / AmountOfYears))
+1 - (ghg / ((InitBAUemission * AmountOfYears / 100) / AmountOfYears))
 2
 1
 11
 
 MONITOR
-805
-65
-885
-110
+1125
+270
+1205
+315
 cGHG reduction
-1 - cumulativeghg / InitBAUemission
+1 - cumulativeghg / (InitBAUemission * AmountOfYears / 100)
 2
 1
 11
@@ -641,25 +775,25 @@ NIL
 1
 
 SLIDER
-395
-265
-570
-298
+310
+285
+485
+318
 YearsBetweenInternationalNegotiations
 YearsBetweenInternationalNegotiations
 1
 100
-20
+15
 1
 1
 NIL
 HORIZONTAL
 
 MONITOR
-400
-175
-500
-220
+1215
+368
+1294
+413
 Cumulative GHG
 cumulativeghg
 0
@@ -667,25 +801,25 @@ cumulativeghg
 11
 
 SLIDER
-395
-575
-565
-608
-RatioLocalEmissionNationalEmission
-RatioLocalEmissionNationalEmission
-0
+310
+615
+485
+648
+RatioIndividualEmissionNationalEmission
+RatioIndividualEmissionNationalEmission
+0.01
 1
-0.61
+0.4
 .01
 1
 NIL
 HORIZONTAL
 
 PLOT
-890
+310
 20
-1185
-245
+580
+190
 Climate Change Impact as a function of Cumulative GHG
 Expected Cumulative GhG (/1000)
 Climate Change Impact
@@ -700,49 +834,669 @@ PENS
 "default" 1.0 0 -16777216 true "" "plotxy cumghg impact"
 
 SLIDER
-1190
+585
 20
-1282
+677
 53
 ExpFactor
 ExpFactor
 1.01
 2
-1.1
+1.03
 .01
 1
 NIL
 HORIZONTAL
 
 MONITOR
-1190
-95
-1270
-140
+1217
+318
+1299
+363
 NIL
 InitBAUemission
-17
-1
-11
-
-MONITOR
-600
-175
-700
-220
-NIL
-ghg
 0
 1
 11
 
 SLIDER
-1190
+584
+58
+676
+91
+ImpactFactor
+ImpactFactor
+0.1
+2
+1
+.1
+1
+NIL
+HORIZONTAL
+
+TEXTBOX
+314
+211
+481
+239
+International negotiations on Climate Change\n
+11
+94.0
+1
+
+SLIDER
+310
+401
+485
+434
+EffectInternationalPolicyOnIndividuals
+EffectInternationalPolicyOnIndividuals
+0
+1
+1
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+310
+436
+485
+469
+EffectInternationalPolicyOnNationalPolicy
+EffectInternationalPolicyOnNationalPolicy
+0
+1
+1
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+505
+285
+680
+318
+BaseChanceOfClimateDisaster
+BaseChanceOfClimateDisaster
+0
+1
+0.05
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+505
+355
+680
+388
+InitialSeverityOfClimateDisaster
+InitialSeverityOfClimateDisaster
+0
+1
+0.1
+.05
+1
+NIL
+HORIZONTAL
+
+MONITOR
+719
+697
+786
+742
+CCawInd1
+mean [CCawareness] of Individuals with [countrycode = 1]
+2
+1
+11
+
+MONITOR
+794
+697
+861
+742
+CCawInd2
+mean [CCawareness] of Individuals with [countrycode = 2]
+2
+1
+11
+
+MONITOR
+869
+697
+939
+742
+CCawInd3
+mean [CCawareness] of Individuals with [countrycode = 3]
+2
+1
+11
+
+MONITOR
+944
+697
+1011
+742
+CCawInd4
+mean [CCawareness] of Individuals with [countrycode = 4]
+2
+1
+11
+
+MONITOR
+1019
+698
+1086
+743
+CCawInd5
+mean [CCawareness] of Individuals with [countrycode = 5]
+2
+1
+11
+
+MONITOR
+1094
+698
+1161
+743
+CCawInd6
+mean [CCawareness] of Individuals with [countrycode = 6]
+2
+1
+11
+
+MONITOR
+1166
+698
+1233
+743
+CCawInd7
+mean [CCawareness] of Individuals with [countrycode = 7]
+17
+1
+11
+
+MONITOR
+1238
+698
+1305
+743
+CCawInd8
+mean [CCawareness] of Individuals with [countrycode = 8]
+2
+1
+11
+
+MONITOR
+1312
+698
+1379
+743
+CCawInd9
+mean [CCawareness] of Individuals with [countrycode = 9]
+2
+1
+11
+
+MONITOR
+1386
+698
+1456
+743
+CCawInd10
+mean [CCawareness] of Individuals with [countrycode = 10]
+2
+1
+11
+
+SLIDER
+15
+615
+202
+648
+SDTimeHorizonDistribution
+SDTimeHorizonDistribution
+0
+20
+10
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+15
+248
+107
+281
+TimeHorizonGov1
+TimeHorizonGov1
+0
+100
+5
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+15
+283
+107
+316
+TimeHorizonGov2
+TimeHorizonGov2
+0
+100
+57
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+15
+318
+107
+351
+TimeHorizonGov3
+TimeHorizonGov3
+0
+100
+38
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+15
+353
+107
+386
+TimeHorizonGov4
+TimeHorizonGov4
+0
+100
+80
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+15
+388
+107
+421
+TimeHorizonGov5
+TimeHorizonGov5
+0
+100
+36
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+15
+423
+107
+456
+TimeHorizonGov6
+TimeHorizonGov6
+0
+100
 55
-1282
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+15
+458
+107
+491
+TimeHorizonGov7
+TimeHorizonGov7
+0
+100
+9
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+15
+493
+107
+526
+TimeHorizonGov8
+TimeHorizonGov8
+0
+100
 88
-ImpactFactor
-ImpactFactor
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+15
+528
+107
+561
+TimeHorizonGov9
+TimeHorizonGov9
+0
+100
+41
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+16
+564
+108
+597
+TimeHorizonGov10
+TimeHorizonGov10
+0
+100
+0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+205
+248
+297
+281
+DemocraticValue1
+DemocraticValue1
+0
+1
+0.58
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+205
+283
+297
+316
+DemocraticValue2
+DemocraticValue2
+0
+1
+0.72
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+205
+318
+297
+351
+DemocraticValue3
+DemocraticValue3
+0
+1
+0.29
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+205
+353
+297
+386
+DemocraticValue4
+DemocraticValue4
+0
+1
+0.5
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+205
+388
+297
+421
+DemocraticValue5
+DemocraticValue5
+0
+1
+0.54
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+205
+423
+297
+456
+DemocraticValue6
+DemocraticValue6
+0
+1
+0.34
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+205
+458
+297
+491
+DemocraticValue7
+DemocraticValue7
+0
+1
+0.78
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+205
+493
+297
+526
+DemocraticValue8
+DemocraticValue8
+0
+1
+0.83
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+205
+528
+297
+561
+DemocraticValue9
+DemocraticValue9
+0
+1
+0.82
+.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+205
+563
+297
+596
+DemocraticValue10
+DemocraticValue10
+0
+1
+0.46
+.01
+1
+NIL
+HORIZONTAL
+
+TEXTBOX
+61
+228
+76
+246
+1*
+11
+94.0
+1
+
+TEXTBOX
+155
+228
+170
+246
+2*
+11
+94.0
+1
+
+TEXTBOX
+251
+228
+266
+246
+3*
+11
+94.0
+1
+
+TEXTBOX
+20
+654
+35
+672
+4*
+11
+94.0
+1
+
+TEXTBOX
+20
+130
+170
+148
+Agent settings\n
+11
+94.0
+1
+
+SLIDER
+205
+615
+297
+648
+EmissionMemory
+EmissionMemory
+2
+10
+3
+1
+1
+NIL
+HORIZONTAL
+
+TEXTBOX
+211
+654
+231
+672
+5*
+11
+94.0
+1
+
+SLIDER
+505
+390
+680
+423
+ClimateDisasterMemory
+ClimateDisasterMemory
+0
+20
+3
+1
+1
+NIL
+HORIZONTAL
+
+TEXTBOX
+508
+211
+658
+229
+Climate Disasters
+11
+94.0
+1
+
+SWITCH
+505
+250
+680
+283
+ClimateDisasters
+ClimateDisasters
+0
+1
+-1000
+
+CHOOSER
+310
+320
+485
+365
+GameTheory
+GameTheory
+"Cooperative" "Prisoners"
+0
+
+SLIDER
+310
+366
+485
+399
+MitigationEnforcementFactor
+MitigationEnforcementFactor
 0
 1
 1
@@ -752,699 +1506,349 @@ NIL
 HORIZONTAL
 
 MONITOR
+717
 575
-265
+867
+620
+Enforced Mitigation Agreement
+Mitigationgoal * MitigationEnforcementFactor
+2
+1
+11
+
+MONITOR
+717
+625
+867
 670
-310
 NIL
-ChanceForSucces
-2
-1
-11
-
-SLIDER
-395
-300
-570
-333
-ImportanceOpinionDifference
-ImportanceOpinionDifference
-0
-1
-0.05
-.05
-1
-NIL
-HORIZONTAL
-
-TEXTBOX
-400
-245
-550
-263
-International negotiations\n
-11
-94.0
-1
-
-SLIDER
-395
-335
-570
-368
-ReductionPolicyImpact
-ReductionPolicyImpact
-0
-1
-0.05
-.05
-1
-NIL
-HORIZONTAL
-
-SLIDER
-395
-370
-570
-403
-EffectInternationalPolicyOnIndividuals
-EffectInternationalPolicyOnIndividuals
-0
-1
-1
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-395
-405
-570
-438
-EffectInternationalPolicyOnNationalPolicy
-EffectInternationalPolicyOnNationalPolicy
-0
-1
-1
-1
-1
-NIL
-HORIZONTAL
-
-TEXTBOX
-580
-315
-820
-545
-International negotiations are held every predetermined amount of years. The larger the political preference of the population, the larger the chance for a succesful outcome of the negotiations. However, if the difference in political preference between countries is too big, the chance for succesful negotiations decreases. This importance of this effect can be determined.\n\nA succesful negotiation increases the ghg reduction measures taken. The effect of such an international agreement can differ between individual mitigation measures and national mitigation measures.
-11
-94.0
-1
-
-TEXTBOX
-890
-250
-1270
-471
-An assumption of this model is that the impact of climate change is a function of the cumulative ghg emissions. The impact of climate change ranges from 0 to 1, which implies that the impact is 1 in the year 2100 when no mitigation actions are taken. \n\nAgents have a certain vision, which means that they can predict the cumulative ghg emissions at the business as usual (bau) rate, the rate at which they emit ghg at that moment in time, over a certain amount of years. They use this graph to assess the impact of climate change, which influences their climate change awareness.\n\nThe shape of the exponential curve can be changed by using the ExpFactor. The ImpactFactor can be used to assign a cumulative ghg to the climate change impact of 0.
-11
-94.0
-1
-
-PLOT
-890
-670
-1090
-820
-Cumulative Mitigation Actions
-Time
-NIL
-0.0
-100.0
-0.0
-1.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plotxy ticks (cumulativemitigation / (#persons + #persons / RatioLocalEmissionNationalEmission))"
-
-SLIDER
-1095
-670
-1280
-703
-ChanceOfClimateDisaster
-ChanceOfClimateDisaster
-0
-1
-0.02
-.01
-1
-NIL
-HORIZONTAL
-
-TEXTBOX
-395
-610
-695
-720
-The total ghg emissions consists of individual emissions and national controlled emissions. The difference is made because individuals are able to change their individual emissions (placing a PV panel on their rooftop), but are only indirecly able to change national emissions (changing the electricity system) by means of expressing their political preference. The ratio between emissions that individuals can directly control can be changed.
-11
-94.0
-1
-
-SLIDER
-1095
-705
-1280
-738
-SeverityOfClimateDisaster
-SeverityOfClimateDisaster
-0
-1
-0.1
-.05
-1
-NIL
-HORIZONTAL
-
-TEXTBOX
-890
-485
-1425
-651
-Ideas\n\nNegotiation power governments;\n\nEmission profiles per country;\n\nClimate Disaster - termporarily increasing climate change awareness (an example of non-rational behaviour and a source of uncertainty, this can even include locality in the model (only some countries get hit);\n\nMitigation potential - Maybe the efficiency of mitigation can change over time. On the one hand the efficiency decreases, due to the fact that quick wins are executed first. On the other hand the efficiency increases, due to learning effects and technological developments. This is a source for uncertainty.\n
-11
-15.0
-1
-
-MONITOR
-300
-255
-370
-300
-Climate Change Awareness 1
-mean [CCawareness] of persons with [countrycode = 1]
-2
-1
-11
-
-MONITOR
-300
-290
-370
-335
-Climate Change Awareness 2
-mean [CCawareness] of persons with [countrycode = 2]
-2
-1
-11
-
-MONITOR
-300
-325
-370
-370
-Climate Change Awareness 3
-mean [CCawareness] of persons with [countrycode = 3]
-2
-1
-11
-
-MONITOR
-300
-360
-370
-405
-Climate Change Awareness 4
-mean [CCawareness] of persons with [countrycode = 4]
-2
-1
-11
-
-MONITOR
-300
-395
-370
-440
-Climate Change Awareness 5
-mean [CCawareness] of persons with [countrycode = 5]
-2
-1
-11
-
-MONITOR
-300
-430
-370
-475
-Climate Change Awareness 6
-mean [CCawareness] of persons with [countrycode = 6]
-2
-1
-11
-
-MONITOR
-300
-465
-370
-510
-Climate Change Awareness 7
-mean [CCawareness] of persons with [countrycode = 7]
+NegotiationCooperatorsList
 17
 1
 11
 
 MONITOR
-300
-500
-370
-545
-Climate Change Awareness 8
-mean [CCawareness] of persons with [countrycode = 8]
+719
+747
+789
+792
+CCawGov1
+mean [CCawareness] of governments with [countrycode = 1]
 2
 1
 11
 
 MONITOR
-300
-530
-370
+794
+747
+864
+792
+CCawGov2
+mean [CCawareness] of governments with [countrycode = 2]
+2
+1
+11
+
+MONITOR
+869
+747
+939
+792
+CCawGov3
+mean [CCawareness] of governments with [countrycode = 3]
+2
+1
+11
+
+MONITOR
+944
+747
+1014
+792
+CCawGov4
+mean [CCawareness] of governments with [countrycode = 4]
+2
+1
+11
+
+MONITOR
+1019
+748
+1089
+793
+CCawGov5
+mean [CCawareness] of governments with [countrycode = 5]
+2
+1
+11
+
+SWITCH
+310
+250
+485
+283
+InternationalNegotiations
+InternationalNegotiations
+0
+1
+-1000
+
+MONITOR
+883
 575
-Climate Change Awareness 9
-mean [CCawareness] of persons with [countrycode = 9]
-2
-1
-11
-
-MONITOR
-300
-570
-370
-615
-Climate Change Awareness 10
-mean [CCawareness] of persons with [countrycode = 10]
-2
-1
-11
-
-MONITOR
-705
-175
-805
-220
-Climate Change Awareness
-mean [CCawareness] of persons
-2
-1
-11
-
-SLIDER
-10
+1052
 620
-102
-653
-SDVisionDistribution
-SDVisionDistribution
-0
-20
-20
-1
-1
 NIL
-HORIZONTAL
+LocalityOfClimateDisasterList
+17
+1
+11
+
+MONITOR
+883
+623
+1052
+668
+NIL
+ClimateDisasterMemoryCounter
+17
+1
+11
+
+MONITOR
+719
+799
+1525
+844
+NIL
+ClimateDisasterYearList
+17
+1
+11
+
+MONITOR
+719
+847
+1525
+892
+NIL
+NegotiationList
+17
+1
+11
+
+MONITOR
+1094
+748
+1161
+793
+CCawGov6
+mean [CCawareness] of governments with [countrycode = 6]
+2
+1
+11
+
+MONITOR
+1166
+748
+1233
+793
+CCawGov7
+mean [CCawareness] of governments with [countrycode = 7]
+2
+1
+11
+
+MONITOR
+1238
+748
+1306
+793
+CCawGov8
+mean [CCawareness] of governments with [countrycode = 8]
+2
+1
+11
+
+MONITOR
+1312
+748
+1382
+793
+CCawGov9
+mean [CCawareness] of governments with [countrycode = 9]
+2
+1
+11
+
+MONITOR
+1387
+748
+1456
+793
+CCawGov10
+mean [CCawareness] of governments with [countrycode = 10]
+2
+1
+11
+
+PLOT
+714
+418
+914
+568
+Mitigation
+Time
+Total GHG emissions reduction
+0.0
+100.0
+0.0
+10.0
+true
+true
+"" ""
+PENS
+"Ind" 1.0 0 -16777216 true "" "if ticks > 1 [plot MitigationByIndividuals]"
+"Gov" 1.0 0 -7500403 true "" "if ticks > 1 [plot MitigationByGovernments]"
+
+PLOT
+1125
+420
+1325
+570
+Ratio Mitigation by Individuals : Governments
+time
+NIL
+0.0
+100.0
+0.0
+2.0
+false
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "if ticks > 2 [plot MitigationIndividualsGovernmentsRatio]"
+"pen-1" 1.0 0 -7500403 true "" "plot 1"
+
+PLOT
+921
+420
+1121
+570
+Total Enforced Mitigation
+Time
+Total GHG emissions reduction
+0.0
+100.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "if ticks > 1 [plot TotalEnforcedMitigation]"
+
+SWITCH
+1210
+25
+1382
+58
+VisualRepresentation
+VisualRepresentation
+1
+1
+-1000
+
+SWITCH
+506
+426
+681
+459
+ClimateDisasterIncreaseMitigation
+ClimateDisasterIncreaseMitigation
+0
+1
+-1000
+
+CHOOSER
+1335
+420
+1510
+465
+StochasticDeterministicNegotiations
+StochasticDeterministicNegotiations
+"GameTheory" "Putnam"
+0
 
 SLIDER
-10
-265
-102
-298
-VisionCountry1
-VisionCountry1
-0
-100
-35
-5
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-300
-102
-333
-VisionCountry2
-VisionCountry2
-0
-100
-20
-5
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-335
-102
-368
-VisionCountry3
-VisionCountry3
-0
-100
-55
-5
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-370
-102
-403
-VisionCountry4
-VisionCountry4
-0
-100
-30
-5
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-405
-102
-438
-VisionCountry5
-VisionCountry5
-0
-100
-40
-5
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-440
-102
-473
-VisionCountry6
-VisionCountry6
-0
-100
-0
-5
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-475
-102
-508
-VisionCountry7
-VisionCountry7
-0
-100
-0
-5
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-510
-102
-543
-VisionCountry8
-VisionCountry8
-0
-100
-0
-5
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-545
-102
-578
-VisionCountry9
-VisionCountry9
-0
-100
-0
-5
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-580
-102
-613
-VisionCountry10
-VisionCountry10
-0
-100
-0
-5
-1
-NIL
-HORIZONTAL
-
-SLIDER
-200
-265
-292
-298
-DemocraticValue1
-DemocraticValue1
-0
-1
-0.2
-.05
-1
-NIL
-HORIZONTAL
-
-SLIDER
-200
-300
-292
-333
-DemocraticValue2
-DemocraticValue2
-0
-1
-0.4
-.05
-1
-NIL
-HORIZONTAL
-
-SLIDER
-200
-335
-292
-368
-DemocraticValue3
-DemocraticValue3
+1335
+465
+1510
+498
+ImportanceOpinionDifference
+ImportanceOpinionDifference
 0
 1
 0.15
-.05
+.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-200
-370
-292
-403
-DemocraticValue4
-DemocraticValue4
-0
+1335
+500
+1510
+533
+ChanceForSuccesfulNegotiations
+ChanceForSuccesfulNegotiations
 1
-0.4
-.05
+4
 1
-NIL
-HORIZONTAL
-
-SLIDER
-200
-405
-292
-438
-DemocraticValue5
-DemocraticValue5
-0
 1
-0.35
-.05
 1
 NIL
 HORIZONTAL
 
 SLIDER
-200
-440
-292
-473
-DemocraticValue6
-DemocraticValue6
+1335
+555
+1510
+588
+PredictionError
+PredictionError
 0
 1
-0.1
-.05
+0
+.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-200
-475
-292
-508
-DemocraticValue7
-DemocraticValue7
-0
-1
-0.1
-.05
-1
-NIL
-HORIZONTAL
-
-SLIDER
-200
-510
-292
-543
-DemocraticValue8
-DemocraticValue8
-0
-1
-0.1
-.05
-1
-NIL
-HORIZONTAL
-
-SLIDER
-200
-545
-292
-578
-DemocraticValue9
-DemocraticValue9
-0
-1
-0.1
-.05
-1
-NIL
-HORIZONTAL
-
-SLIDER
-200
-580
-292
-613
-DemocraticValue10
-DemocraticValue10
-0
-1
-0.1
-.05
-1
-NIL
-HORIZONTAL
-
-TEXTBOX
-55
-245
-70
-263
-1*
-11
-94.0
-1
-
-TEXTBOX
-150
-245
-165
-263
-2*
-11
-94.0
-1
-
-TEXTBOX
-245
-245
-260
-263
-3*
-11
-94.0
-1
-
-TEXTBOX
-110
-630
-125
-648
-4*
-11
-94.0
-1
-
-TEXTBOX
-20
-145
-170
-163
-Agent settings\n
-11
-94.0
-1
-
-SLIDER
-200
-620
-292
-653
-EmissionMemory
-EmissionMemory
-0
-10
-3
-1
-1
-NIL
-HORIZONTAL
-
-TEXTBOX
-300
-630
+505
 320
-648
-5*
-11
-94.0
-1
-
-SLIDER
-1095
-740
-1280
-773
-ClimateDisasterMemory
-ClimateDisasterMemory
+680
+353
+EffectOfClimateChangeOnClimateDisasters
+EffectOfClimateChangeOnClimateDisasters
 0
-100
-5
 1
+0.5
+.1
 1
 NIL
 HORIZONTAL
+
+CHOOSER
+195
+150
+287
+195
+Distribution
+Distribution
+"Manual" "Automatic" "Random"
+2
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -1804,6 +2208,155 @@ NetLogo 5.1.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="experiment" repetitions="100" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="100"/>
+    <metric>ghg</metric>
+    <enumeratedValueSet variable="MitigationEnforcementFactor">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Vision10">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Vision3">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="EffectInternationalPolicyOnNationalPolicy">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Vision8">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="DemocraticValue3">
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="DemocraticValue9">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="VisionCountry7">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="VisionCountry5">
+      <value value="65"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ClimateDisasters">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ChanceOfClimateDisaster">
+      <value value="0.05"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="DemocraticValue1">
+      <value value="0.35"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="VisionCountry2">
+      <value value="15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="#governments">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="DemocraticValue7">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="DemocraticValue2">
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="VisionCountry9">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="AmountOfYears">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ClimateDisasterMemory">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="DemocraticValue10">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="SDVisionDistribution">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ImpactFactor">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Vision6">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="EmissionMemory">
+      <value value="3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="DemocraticValue6">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Vision5">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="RatioLocalEmissionNationalEmission">
+      <value value="0.6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="InitialSeverityOfClimateDisaster">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="VisionCountry3">
+      <value value="70"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Vision9">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="GameTheory">
+      <value value="&quot;Cooperative&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="VisionCountry10">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="ExpFactor">
+      <value value="1.14"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="DemocraticValue8">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="DemocraticValue4">
+      <value value="0.3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Vision7">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Vision2">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="EffectInternationalPolicyOnIndividuals">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="VisionCountry1">
+      <value value="15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="YearsBetweenInternationalNegotiations">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="VisionCountry8">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="#persons">
+      <value value="80"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="VisionCountry4">
+      <value value="65"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Vision4">
+      <value value="40"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="DemocraticValue5">
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="VisionCountry6">
+      <value value="0"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Vision1">
+      <value value="15"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
