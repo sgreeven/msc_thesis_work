@@ -1,5 +1,5 @@
 '''
-Created on 10 feb. 2014
+Last Modified: 17-3-2015
 Sebastiaan Greeven 
 
 Based on code from jhkwakkel <j.h.kwakkel (at) tudelft (dot) nl>
@@ -20,15 +20,17 @@ class EVO(NetLogoModelStructureInterface):
       
     run_length = 100
       
-    uncertainties = [
-                     ParameterUncertainty((1.03,1.05), 'ExpFactor'),  
+    uncertainties = [ParameterUncertainty((1.03,1.05), 'ExpFactor'),  
    		             ParameterUncertainty((10,15), 'YearsBetweenInternationalNegotiations'),  
-                     ParameterUncertainty((0.3,0.5), 'RatioIndividualEmissionNationalEmission'),  
+                     ParameterUncertainty((0.3,0.6), 'RatioIndividualEmissionNationalEmission'),  
                      ParameterUncertainty((0.05,0.15), 'InitialSeverityOfClimateDisaster')                   
                      ]
       
-    outcomes = [Outcome('cumulativeghg', time=True),  #
-                Outcome('ghg', time=True)
+    outcomes = [Outcome('CumulativeGHGreduction', time=True),
+                Outcome('AnualGHGreduction', time=True),
+                Outcome('BottomUpMitigationRatio', time=True),
+                Outcome('TotalClimateDisasterEffect', time=True),
+                Outcome('TotalAgreementEffect', time=True)
                 ]
     
 if __name__ == "__main__":
@@ -50,6 +52,6 @@ if __name__ == "__main__":
 #     cases = [ {'RatioLocalEmissionNationalEmission': 0.4} for _ in range(100)]
     
     #perform experiments
-    results = ensemble.perform_experiments(100)
+    results = ensemble.perform_experiments(1000, reporting_interval=100)
       
-    save_results(results, r'.\data\EMA results ModelSebastiaanGreeven 100 exp.tar.gz')
+    save_results(results, r'.\data\EMA results ModelSebastiaanGreeven 1000 exp.tar.gz')
