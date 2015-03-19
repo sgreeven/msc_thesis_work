@@ -1690,7 +1690,7 @@ SWITCH
 55
 VisualRepresentation
 VisualRepresentation
-0
+1
 1
 -1000
 
@@ -1835,7 +1835,7 @@ TEXTBOX
 510
 585
 660
-601
+603
 Alternative model structures
 11
 94.0

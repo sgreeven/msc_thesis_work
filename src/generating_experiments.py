@@ -20,17 +20,19 @@ class EVO(NetLogoModelStructureInterface):
       
     run_length = 100
       
-    uncertainties = [ParameterUncertainty((1.03,1.05), 'ExpFactor'),  
-   		             ParameterUncertainty((10,15), 'YearsBetweenInternationalNegotiations'),  
-                     ParameterUncertainty((0.3,0.6), 'RatioIndividualEmissionNationalEmission'),  
-                     ParameterUncertainty((0.05,0.15), 'InitialSeverityOfClimateDisaster')                   
+    uncertainties = [CategoricalUncertainty(('5','10','15'), 'YearsBetweenInternationalNegotiations'),  
+                     ParameterUncertainty((0.3,0.7), 'RatioIndividualEmissionNationalEmission'),  
+                     ParameterUncertainty((0.05,0.15), 'InitialSeverityOfClimateDisaster'),
+                     ParameterUncertainty((0.3,0.7), 'EffectOfClimateChangeOnClimateDisasters'),
+                     ParameterUncertainty((0.5,1), 'MitigationEnforcementFactor'),
+                     CategoricalUncertainty(('2','3','4','5'), 'ClimateDisasterMemory')
                      ]
       
     outcomes = [Outcome('CumulativeGHGreduction', time=True),
                 Outcome('AnualGHGreduction', time=True),
+                Outcome('TotalAgreementEffect', time=True),
                 Outcome('BottomUpMitigationRatio', time=True),
-                Outcome('TotalClimateDisasterEffect', time=True),
-                Outcome('TotalAgreementEffect', time=True)
+                Outcome('TotalClimateDisasterEffect', time=True)                
                 ]
     
 if __name__ == "__main__":
@@ -52,6 +54,7 @@ if __name__ == "__main__":
 #     cases = [ {'RatioLocalEmissionNationalEmission': 0.4} for _ in range(100)]
     
     #perform experiments
-    results = ensemble.perform_experiments(1000, reporting_interval=100)
+    
+    results = ensemble.perform_experiments(100, reporting_interval=10)
       
-    save_results(results, r'.\data\EMA results ModelSebastiaanGreeven 1000 exp.tar.gz')
+    save_results(results, r'.\data\EMA results ModelSebastiaanGreeven 100 exp.tar.gz')
