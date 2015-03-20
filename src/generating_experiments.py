@@ -24,7 +24,10 @@ class EVO(NetLogoModelStructureInterface):
                      ParameterUncertainty((0.3,0.7), 'RatioIndividualEmissionNationalEmission'),  
                      ParameterUncertainty((0.05,0.15), 'InitialSeverityOfClimateDisaster'),
                      ParameterUncertainty((0.3,0.7), 'EffectOfClimateChangeOnClimateDisasters'),
+                     ParameterUncertainty((0.01,0.1), 'BaseChanceOfClimateDisaster'),
                      ParameterUncertainty((0.5,1), 'MitigationEnforcementFactor'),
+                     ParameterUncertainty((1.02,1.05), 'ExpFactor'),
+                     ParameterUncertainty((0.8,1.2), 'ImpactFactor'),
                      CategoricalUncertainty(('2','3','4','5'), 'ClimateDisasterMemory')
                      ]
       
@@ -55,6 +58,6 @@ if __name__ == "__main__":
     
     #perform experiments
     
-    results = ensemble.perform_experiments(100, reporting_interval=10)
+    results = ensemble.perform_experiments(1000, reporting_interval=100)
       
-    save_results(results, r'.\data\EMA results ModelSebastiaanGreeven 100 exp.tar.gz')
+    save_results(results, r'.\data\EMA results ModelSebastiaanGreeven 1000 exp.tar.gz')
