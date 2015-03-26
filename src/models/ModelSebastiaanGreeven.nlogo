@@ -51,7 +51,7 @@ globals [
   TotalMitigation
   BottomUpMitigationRatio
   CumulativeGHGreduction
-  AnualGHGreduction
+  annualGHGreduction
   AgreementEffect
   TotalAgreementEffect
   ClimateDisasterEffect
@@ -204,7 +204,7 @@ to go
   DetermineEmission
   EmitGHG
   DetermineCumulativeGHGreduction
-  DetermineAnualGHGreduction
+  DetermineannualGHGreduction
   DetermineAgreementEffect
   DetermineClimateDisasterEffect
 end
@@ -239,8 +239,8 @@ end
 
 to DetermineClimateDisaster
   if ClimateDisasters = True [    
-    if BaseChanceOfClimateDisaster + (EffectOfClimateChangeOnClimateDisasters * (0 - ((1 - 0) / (-1 + ExpFactor ^ (InitBAUemission * ImpactFactor / 1000)))) + 
-    (((1 - 0) / (-1 + ExpFactor ^ (InitBAUemission * ImpactFactor / 1000)) * ExpFactor ^ (CumulativeGHG / 1000)))) > random-float 1 [
+    if BaseChanceOfClimateDisaster + (EffectOfClimateChangeOnClimateDisasters * (0 - ((1 - 0) / (-1 + ExpFactor ^ (InitBAUemission * ImpactFactor / 1000))) + 
+    (((1 - 0) / (-1 + ExpFactor ^ (InitBAUemission * ImpactFactor / 1000)) * ExpFactor ^ (CumulativeGHG / 1000))))) > random-float 1 [
       let l 1
       while [l <= #Governments] [
         set LocalityOfClimateDisasterList lput l LocalityOfClimateDisasterList
@@ -361,7 +361,9 @@ to DetermineEmission
   ask Governments [set Emission (mean EmissionList * #IndividualsPerGovernment / RatioIndividualEmissionNationalEmission)]
   set TotalEnforcedMitigation (EnforcedMitigationByIndividuals + EnforcedMitigationByGovernments)
   set TotalMitigation (MitigationByIndividuals + EnforcedMitigationByIndividuals + MitigationByGovernments + EnforcedMitigationByGovernments)
-  set BottomUpMitigationRatio (MitigationByIndividuals / TotalMitigation)
+  ifelse TotalMitigation = 0 
+  [set BottomUpMitigationRatio 0]
+  [set BottomUpMitigationRatio (MitigationByIndividuals / TotalMitigation)]
 end 
 
 ;-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------    
@@ -381,8 +383,8 @@ to DetermineCumulativeGHGreduction
   set CumulativeGHGreduction ((1 - cumulativeghg / (InitBAUemission * ticks / AmountOfYears)) * 100)
 end
 
-to DetermineAnualGHGreduction
-  set AnualGHGreduction ((1 - (ghg / ((InitBAUemission * AmountOfYears / 100) / AmountOfYears))) * 100)
+to DetermineannualGHGreduction
+  set annualGHGreduction ((1 - (ghg / ((InitBAUemission * AmountOfYears / 100) / AmountOfYears))) * 100)
 end
 
 to DetermineAgreementEffect
@@ -733,7 +735,7 @@ MONITOR
 1215
 120
 GHG reduction
-AnualGHGreduction
+AnnualGHGreduction
 0
 1
 11
@@ -806,7 +808,7 @@ ExpFactor
 ExpFactor
 1.01
 2
-1.03
+1.02
 .01
 1
 NIL
@@ -1661,7 +1663,6 @@ true
 "" ""
 PENS
 "IncEnf" 1.0 0 -16777216 true "" "if ticks > 1 [plot BottomUpMitigationRatio]"
-"ExlEnf" 1.0 0 -7500403 true "" "if ticks > 1 [plot MitigationByIndividuals / MitigationByGovernments]"
 
 PLOT
 929
@@ -1754,7 +1755,7 @@ PredictionError
 PredictionError
 0
 1
-0
+0.2
 .01
 1
 NIL
@@ -1769,7 +1770,7 @@ EffectOfClimateChangeOnClimateDisasters
 EffectOfClimateChangeOnClimateDisasters
 0
 1
-0.5
+0
 .1
 1
 NIL
@@ -1808,7 +1809,7 @@ PLOT
 22
 926
 172
-Anual GHG Reduction
+Annual GHG Reduction
 NIL
 NIL
 0.0
@@ -1819,7 +1820,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plotxy ticks AnualGHGreduction"
+"default" 1.0 0 -16777216 true "" "plotxy ticks AnnualGHGreduction"
 
 TEXTBOX
 695
