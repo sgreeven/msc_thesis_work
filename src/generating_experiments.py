@@ -23,10 +23,8 @@ class EVO(NetLogoModelStructureInterface):
       
     run_length = 100
       
-    uncertainties = [
-                    ParameterUncertainty((1.01,1.03), 'ExpFactor'),
-                    ParameterUncertainty((0.8,1.2), 'ImpactFactor'),
-                     ParameterUncertainty((0.1,0.8), 'RatioIndividualEmissionNationalEmission'),
+    uncertainties = [ParameterUncertainty((1.01,1.03), 'ExpFactor'),
+                     ParameterUncertainty((0.8,1.2), 'ImpactFactor'),
                      ParameterUncertainty((0,100), 'TimeHorizonGov1'),
                      ParameterUncertainty((0,100), 'TimeHorizonGov2'),
                      ParameterUncertainty((0,100), 'TimeHorizonGov3'),
