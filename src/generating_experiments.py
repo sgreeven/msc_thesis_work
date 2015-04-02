@@ -196,7 +196,7 @@ if __name__ == "__main__":
     ensemble.parallel = True
     
     #perform experiments
-    nr_experiments = 10000
+    nr_experiments = 5000
     results = ensemble.perform_experiments(nr_experiments, 
                                            reporting_interval=100)
     
