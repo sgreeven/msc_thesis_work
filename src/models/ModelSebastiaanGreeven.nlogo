@@ -775,7 +775,7 @@ RatioIndividualEmissionNationalEmission
 RatioIndividualEmissionNationalEmission
 0.01
 1
-0.4
+0.8
 .01
 1
 NIL
@@ -1017,7 +1017,7 @@ SLIDER
 SDTimeHorizonDistribution
 SDTimeHorizonDistribution
 0
-20
+30
 10
 1
 1
@@ -1784,7 +1784,7 @@ CHOOSER
 Distribution
 Distribution
 "Manual" "Automatic" "Random"
-1
+0
 
 PLOT
 930
