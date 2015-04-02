@@ -4,19 +4,18 @@ Sebastiaan Greeven
 
 Based on code from jhkwakkel <j.h.kwakkel (at) tudelft (dot) nl>
 '''
-
+ 
 import os
 from collections import defaultdict
-
+ 
 import numpy as np
-
-
 import jpype
   
 from connectors.netlogo import NetLogoModelStructureInterface
 from expWorkbench import ParameterUncertainty, CategoricalUncertainty, Outcome,\
                          ModelEnsemble, ema_logging, save_results, warning,\
                          debug
+ 
   
 class EVO(NetLogoModelStructureInterface):
     model_file = r"/ModelSebastiaanGreeven.nlogo"
@@ -26,7 +25,6 @@ class EVO(NetLogoModelStructureInterface):
     uncertainties = [
                     ParameterUncertainty((1.01,1.03), 'ExpFactor'),
                     ParameterUncertainty((0.8,1.2), 'ImpactFactor'),
-                     ParameterUncertainty((0.1,0.8), 'RatioIndividualEmissionNationalEmission'),
                      ParameterUncertainty((0,100), 'TimeHorizonGov1'),
                      ParameterUncertainty((0,100), 'TimeHorizonGov2'),
                      ParameterUncertainty((0,100), 'TimeHorizonGov3'),
@@ -64,10 +62,10 @@ class EVO(NetLogoModelStructureInterface):
                 Outcome('TotalClimateDisasterEffect', time=True)                
                 ]
     
-    nr_replications = 5
+    nr_replications = 100
     
     
-    def __init__(self, working_directory, name):
+    def __init__(self, working_directory, name, defaults={}):
         super(EVO, self).__init__(working_directory, name)
         
         self.oois = self.outcomes[:]
@@ -77,14 +75,24 @@ class EVO(NetLogoModelStructureInterface):
             temp_outcomes.append(Outcome(outcome.name+'_mean', time=True))
             temp_outcomes.append(Outcome(outcome.name+'_std', time=True))
         self.outcomes = temp_outcomes
+        
+        self.defaults = defaults
+        
+        unc_to_remove = self.defaults.keys()
+        self.uncertainties = [unc for unc in self.uncertainties if unc.name not in unc_to_remove]
+        
     
     def run_model(self, case):
+        
+        for key, value in self.defaults.items():
+            case[key] = value
+        
         replications = defaultdict(list)
         
         for i in range(self.nr_replications):
             ema_logging.debug('running replication {}'.format(i))
             self._run_case(case)
-
+ 
             for key, value in self.output.items():
                 replications[key].append(value)
         
@@ -153,7 +161,7 @@ class EVO(NetLogoModelStructureInterface):
             else:
                 end_commands.append(nc)
                 
-
+ 
         c_start = "repeat {} [".format(self.run_length)
         c_close = "go ]"
         c_middle = " ".join(time_commands)
@@ -177,22 +185,21 @@ if __name__ == "__main__":
     #turn on logging
     ema_logging.log_to_stderr(ema_logging.INFO)
       
-    #instantiate a model
-    vensimModel = EVO( r"./models", "simpleModel")
+    msi = EVO(r"./models", 'full')
       
     #instantiate an ensemble
     ensemble = ModelEnsemble()
       
     #set the model on the ensemble
-    ensemble.set_model_structure(vensimModel)
-#        
-#     run in parallel, if not set, FALSE is assumed
+    ensemble.set_model_structure(msi)
+    
     ensemble.parallel = True
-      
-#     cases = [ {'RatioLocalEmissionNationalEmission': 0.4} for _ in range(100)]
     
     #perform experiments
+    nr_experiments = 5000
+    results = ensemble.perform_experiments(nr_experiments, 
+                                           reporting_interval=100)
     
-    results = ensemble.perform_experiments(10, reporting_interval=1)
-      
-    save_results(results, r'.\data\EMA results ModelSebastiaanGreeven 10 exp 5 rep fixed climate change impact.tar.gz')
+    fn = r'.\data\full {} exp {} rep.tar.gz'.format(nr_experiments, 
+                                                    msi.nr_replications)
+    save_results(results, fn)
