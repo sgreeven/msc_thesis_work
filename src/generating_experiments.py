@@ -186,45 +186,47 @@ if __name__ == "__main__":
     ema_logging.log_to_stderr(ema_logging.INFO)
       
       
-    defaults = {'TimeHorizonGov1':25,
-                'TimeHorizonGov2':25,
-                'TimeHorizonGov3':25,
-                'TimeHorizonGov4':25,
-                'TimeHorizonGov5':25,
-                'TimeHorizonInd1':25,
-                'TimeHorizonInd2':25,
-                'TimeHorizonInd3':25,
-                'TimeHorizonInd4':25,
-                'TimeHorizonInd5':25}
-    msi1 = EVO(r"./models", 'shortTimeHorizon', defaults=defaults)
-    
-    defaults = {'TimeHorizonGov1':50,
-                'TimeHorizonGov2':50,
-                'TimeHorizonGov3':50,
-                'TimeHorizonGov4':50,
-                'TimeHorizonGov5':50,
-                'TimeHorizonInd1':50,
-                'TimeHorizonInd2':50,
-                'TimeHorizonInd3':50,
-                'TimeHorizonInd4':50,
-                'TimeHorizonInd5':50}
-    msi2 = EVO(r"./models", 'longTimeHorizon', defaults=defaults)
-    
+#     defaults = {'TimeHorizonGov1':25,
+#                 'TimeHorizonGov2':25,
+#                 'TimeHorizonGov3':25,
+#                 'TimeHorizonGov4':25,
+#                 'TimeHorizonGov5':25,
+#                 'TimeHorizonInd1':25,
+#                 'TimeHorizonInd2':25,
+#                 'TimeHorizonInd3':25,
+#                 'TimeHorizonInd4':25,
+#                 'TimeHorizonInd5':25}
+#     msi1 = EVO(r"./models", 'shortTimeHorizon', defaults=defaults)
+#     
+#     defaults = {'TimeHorizonGov1':50,
+#                 'TimeHorizonGov2':50,
+#                 'TimeHorizonGov3':50,
+#                 'TimeHorizonGov4':50,
+#                 'TimeHorizonGov5':50,
+#                 'TimeHorizonInd1':50,
+#                 'TimeHorizonInd2':50,
+#                 'TimeHorizonInd3':50,
+#                 'TimeHorizonInd4':50,
+#                 'TimeHorizonInd5':50}
+#     msi2 = EVO(r"./models", 'longTimeHorizon', defaults=defaults)
+
+    msi1 = EVO('./models', 'full')
+     
     #instantiate an ensemble
     ensemble = ModelEnsemble()
       
     #set the model on the ensemble
     ensemble.add_model_structure(msi1)
-    ensemble.add_model_structure(msi2)
+#     ensemble.add_model_structure(msi2)
         
     ensemble.parallel = True
-    ensemble.processes = 48
+    ensemble.processes = 36
     
     #perform experiments
     nr_experiments = 1000
     results = ensemble.perform_experiments(nr_experiments, 
                                            reporting_interval=100)
     
-    fn = r'.\data\time horizon {} exp {} rep.tar.gz'.format(nr_experiments, 
+    fn = r'.\data\full {} exp {} rep.tar.gz'.format(nr_experiments, 
                                                     msi1.nr_replications)
     save_results(results, fn)
