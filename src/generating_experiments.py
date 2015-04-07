@@ -193,10 +193,10 @@ if __name__ == "__main__":
     #
     # START experiment specifics
     #
-    defaults = {'GameTheory':"Cooperative"}
+    defaults = {'GameTheory':'"Cooperative"'}
     msi1 = EVO(r"./models", 'Cooperative', defaults=defaults)
     
-    defaults = {'GameTheory':"Prisoners"}
+    defaults = {'GameTheory':'"Prisoners"'}
     msi2 = EVO(r"./models", 'Prisoners', defaults=defaults)
          
     #set the model on the ensemble
