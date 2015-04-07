@@ -213,20 +213,23 @@ if __name__ == "__main__":
                'longTimeHorizon', 
                defaults=defaults)
     
+
+    msi1 = EVO('./models', 'full')
+     
     #instantiate an ensemble
     ensemble = ModelEnsemble()
       
     #set the model on the ensemble
-    ensemble.add_model_structures([msi1, msi2])
-      
+    ensemble.add_model_structure(msi1)
+        
     ensemble.parallel = True
-#     ensemble.processes = 48
-    
+    ensemble.processes = 36
+
     #perform experiments
     nr_experiments = 1000
     results = ensemble.perform_experiments(nr_experiments, 
                                            reporting_interval=100)
     
-    fn = r'.\data\time horizon {} exp {} rep.tar.gz'.format(nr_experiments, 
+    fn = r'.\data\full {} exp {} rep.tar.gz'.format(nr_experiments, 
                                                     msi1.nr_replications)
     save_results(results, fn)
