@@ -21,7 +21,7 @@ class EVO(NetLogoModelStructureInterface):
     model_file = r"/ModelSebastiaanGreeven.nlogo"
       
     run_length = 100
-      
+
     uncertainties = [
                     ParameterUncertainty((1.01,1.03), 'ExpFactor'),
                     ParameterUncertainty((0.8,1.2), 'ImpactFactor'),
@@ -185,7 +185,6 @@ if __name__ == "__main__":
     #turn on logging
     ema_logging.log_to_stderr(ema_logging.INFO)
       
-      
     defaults = {'TimeHorizonGov1':25,
                 'TimeHorizonGov2':25,
                 'TimeHorizonGov3':25,
@@ -196,7 +195,9 @@ if __name__ == "__main__":
                 'TimeHorizonInd3':25,
                 'TimeHorizonInd4':25,
                 'TimeHorizonInd5':25}
-    msi1 = EVO(r"./models", 'shortTimeHorizon', defaults=defaults)
+    msi1 = EVO(r"./models", 
+               'shortTimeHorizon', 
+               defaults=defaults)
     
     defaults = {'TimeHorizonGov1':50,
                 'TimeHorizonGov2':50,
@@ -208,17 +209,18 @@ if __name__ == "__main__":
                 'TimeHorizonInd3':50,
                 'TimeHorizonInd4':50,
                 'TimeHorizonInd5':50}
-    msi2 = EVO(r"./models", 'longTimeHorizon', defaults=defaults)
+    msi2 = EVO(r"./models", 
+               'longTimeHorizon', 
+               defaults=defaults)
     
     #instantiate an ensemble
     ensemble = ModelEnsemble()
       
     #set the model on the ensemble
-    ensemble.add_model_structure(msi1)
-    ensemble.add_model_structure(msi2)
-        
+    ensemble.add_model_structures([msi1, msi2])
+      
     ensemble.parallel = True
-    ensemble.processes = 48
+#     ensemble.processes = 48
     
     #perform experiments
     nr_experiments = 1000
