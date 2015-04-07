@@ -193,16 +193,16 @@ if __name__ == "__main__":
     #
     # START experiment specifics
     #
-    defaults = {'ImpactFactor':1.01}
-    msi1 = EVO(r"./models", 'HighClimateSensitivity', defaults=defaults)
+    defaults = {'GameTheory':"Cooperative"}
+    msi1 = EVO(r"./models", 'Cooperative', defaults=defaults)
     
-    defaults = {'ImpactFactor':1.03}
-    msi2 = EVO(r"./models", 'LowClimateSensitivity', defaults=defaults)
+    defaults = {'GameTheory':"Prisoners"}
+    msi2 = EVO(r"./models", 'Prisoners', defaults=defaults)
          
     #set the model on the ensemble
-    ensemble.set_model_structures([msi1, msi2])
+    ensemble.add_model_structures([msi1, msi2])
  
-    fn = r'.\data\climate sensitivity {} exp {} rep.tar.gz'.format(nr_experiments, 
+    fn = r'.\data\game theory {} exp {} rep.tar.gz'.format(nr_experiments, 
                                                                    msi1.nr_replications)
     #
     # END
