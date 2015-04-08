@@ -193,16 +193,15 @@ if __name__ == "__main__":
     #
     # START experiment specifics
     #
-    defaults = {'ClimateDisasterIncreaseMitigation':True}
-    msi1 = EVO(r"./models", 'ClimateDisasterMitigation', defaults=defaults)
+    defaults = {'SDTimeHorizonDistribution':20}
+    msi1 = EVO(r"./models", 'Heterogeneous', defaults=defaults)
     
-    defaults = {'ClimateDisasterIncreaseMitigation':False}
-    msi2 = EVO(r"./models", 'ClimateDisasterAdaptation', defaults=defaults)
-         
+    defaults = {'SDTimeHorizonDistribution':0}
+    msi2 = EVO(r"./models", 'Homogeneous', defaults=defaults)         
     #set the model on the ensemble
     ensemble.add_model_structures([msi1, msi2])
  
-    fn = r'.\data\climate disaster {} exp {} rep.tar.gz'.format(nr_experiments, 
+    fn = r'.\data\heterogeneity {} exp {} rep.tar.gz'.format(nr_experiments, 
                                                                    msi1.nr_replications)
     #
     # END
