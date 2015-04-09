@@ -193,16 +193,34 @@ if __name__ == "__main__":
     #
     # START experiment specifics
     #
-    defaults = {'ImpactFactor':1.01}
-    msi1 = EVO(r"./models", 'HighClimateSensitivity', defaults=defaults)
+    defaults = {'TimeHorizonGov1':30,
+                'TimeHorizonGov2':30,
+                'TimeHorizonGov3':5,
+                'TimeHorizonGov4':5,
+                'TimeHorizonGov5':5,
+                'TimeHorizonInd1':30,
+                'TimeHorizonInd2':30,
+                'TimeHorizonInd3':5,
+                'TimeHorizonInd4':5,
+                'TimeHorizonInd5':5}
+    msi1 = EVO(r"./models", 'shortTimeHorizon', defaults=defaults)
     
-    defaults = {'ImpactFactor':1.03}
-    msi2 = EVO(r"./models", 'LowClimateSensitivity', defaults=defaults)
+    defaults = {'TimeHorizonGov1':15,
+                'TimeHorizonGov2':15,
+                'TimeHorizonGov3':15,
+                'TimeHorizonGov4':15,
+                'TimeHorizonGov5':15,
+                'TimeHorizonInd1':15,
+                'TimeHorizonInd2':15,
+                'TimeHorizonInd3':15,
+                'TimeHorizonInd4':15,
+                'TimeHorizonInd5':15}
+    msi2 = EVO(r"./models", 'longTimeHorizon', defaults=defaults)
     
     #set the model on the ensemble
     ensemble.add_model_structures([msi1, msi2])
  
-    fn = r'.\data\climate sensitivity {} exp {} rep.tar.gz'.format(nr_experiments, 
+    fn = r'.\data\country differences {} exp {} rep.tar.gz'.format(nr_experiments, 
                                                                    msi1.nr_replications)
     #
     # END
