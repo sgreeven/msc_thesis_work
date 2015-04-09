@@ -193,15 +193,16 @@ if __name__ == "__main__":
     #
     # START experiment specifics
     #
-    defaults = {'SDTimeHorizonDistribution':20}
-    msi1 = EVO(r"./models", 'Heterogeneous', defaults=defaults)
+    defaults = {'ImpactFactor':1.01}
+    msi1 = EVO(r"./models", 'HighClimateSensitivity', defaults=defaults)
     
-    defaults = {'SDTimeHorizonDistribution':0}
-    msi2 = EVO(r"./models", 'Homogeneous', defaults=defaults)         
+    defaults = {'ImpactFactor':1.03}
+    msi2 = EVO(r"./models", 'LowClimateSensitivity', defaults=defaults)
+    
     #set the model on the ensemble
     ensemble.add_model_structures([msi1, msi2])
  
-    fn = r'.\data\heterogeneity {} exp {} rep.tar.gz'.format(nr_experiments, 
+    fn = r'.\data\climate sensitivity {} exp {} rep.tar.gz'.format(nr_experiments, 
                                                                    msi1.nr_replications)
     #
     # END
