@@ -1,0 +1,84 @@
+Experiment 1: Time Horizon    
+    	defaults = {'TimeHorizonGov1':10,
+                'TimeHorizonGov2':10,
+                'TimeHorizonGov3':10,
+                'TimeHorizonGov4':10,
+                'TimeHorizonGov5':10,
+                'TimeHorizonInd1':10,
+                'TimeHorizonInd2':10,
+                'TimeHorizonInd3':10,
+                'TimeHorizonInd4':10,
+                'TimeHorizonInd5':10}
+    msi1 = EVO(r"./models", 'shortTimeHorizon', defaults=defaults)
+    
+    defaults = {'TimeHorizonGov1':40,
+                'TimeHorizonGov2':40,
+                'TimeHorizonGov3':40,
+                'TimeHorizonGov4':40,
+                'TimeHorizonGov5':40,
+                'TimeHorizonInd1':40,
+                'TimeHorizonInd2':40,
+                'TimeHorizonInd3':40,
+                'TimeHorizonInd4':40,
+                'TimeHorizonInd5':40}
+    msi2 = EVO(r"./models", 'longTimeHorizon', defaults=defaults)
+
+Experiment 2: Climate Sensitivity
+    defaults = {'ImpactFactor':1.01}
+    msi1 = EVO(r"./models", 'HighClimateSensitivity', defaults=defaults)
+    
+    defaults = {'ImpactFactor':1.03}
+    msi2 = EVO(r"./models", 'LowClimateSensitivity', defaults=defaults)
+
+Experiment 3: Game Theory
+    defaults = {'GameTheory':"Cooperative"}
+    msi1 = EVO(r"./models", 'Cooperative', defaults=defaults)
+    
+    defaults = {'GameTheory':"Prisoners"}
+    msi2 = EVO(r"./models", 'Prisoners', defaults=defaults)
+	
+Experiment 4: Climate Disasters Effect
+    defaults = {'ClimateDisasterIncreaseMitigation':True}
+    msi1 = EVO(r"./models", 'ClimateDisasterMitigation', defaults=defaults)
+    
+    defaults = {'ClimateDisasterIncreaseMitigation':False}
+    msi2 = EVO(r"./models", 'ClimateDisasterAdaptation', defaults=defaults)
+	
+Experiment 5: Heterogeneity
+    defaults = {'SDTimeHorizonDistribution':20}
+    msi1 = EVO(r"./models", 'Heterogeneous', defaults=defaults)
+    
+    defaults = {'SDTimeHorizonDistribution':0}
+    msi2 = EVO(r"./models", 'Homogeneous', defaults=defaults)
+	
+Experiment 6: Country Differences  
+	defaults = {'TimeHorizonGov1':30,
+                'TimeHorizonGov2':30,
+                'TimeHorizonGov3':5,
+                'TimeHorizonGov4':5,
+                'TimeHorizonGov5':5,
+                'TimeHorizonInd1':30,
+                'TimeHorizonInd2':30,
+                'TimeHorizonInd3':5,
+                'TimeHorizonInd4':5,
+                'TimeHorizonInd5':5}
+    msi1 = EVO(r"./models", 'shortTimeHorizon', defaults=defaults)
+    
+    defaults = {'TimeHorizonGov1':15,
+                'TimeHorizonGov2':15,
+                'TimeHorizonGov3':15,
+                'TimeHorizonGov4':15,
+                'TimeHorizonGov5':15,
+                'TimeHorizonInd1':15,
+                'TimeHorizonInd2':15,
+                'TimeHorizonInd3':15,
+                'TimeHorizonInd4':15,
+                'TimeHorizonInd5':15}
+    msi2 = EVO(r"./models", 'longTimeHorizon', defaults=defaults)
+
+Experiment 7: Climate Change Effect on Climate Disasters
+    defaults = {'EffectOfClimateChangeOnClimateDisasters':1}
+    msi1 = EVO(r"./models", 'ClimateDisasterRelationCC', defaults=defaults)
+    
+    defaults = {'EffectOfClimateChangeOnClimateDisasters':0}
+    msi2 = EVO(r"./models", 'ClimateDisasterNoRelationCC', defaults=defaults)
